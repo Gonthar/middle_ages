@@ -1,0 +1,3 @@
+/home/maciek/Projects/middle_ages/CMakeFiles/edit_cache.dir
+/home/maciek/Projects/middle_ages/CMakeFiles/rebuild_cache.dir
+/home/maciek/Projects/middle_ages/CMakeFiles/middle_ages.dir
