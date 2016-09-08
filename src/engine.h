@@ -5,6 +5,9 @@
     @author Jan Wroblewski <xi@mimuw.edu.pl>
     @copyright Uniwersytet Warszawski
     @date 2016-04-26
+
+    @edited by Maciej Gontar <mg277344@mimuw.edu.pl>
+    @date 2016-08-26
  */
 
 #ifndef ENGINE_H
@@ -19,6 +22,18 @@ enum GameResult {
 	RESULT_DRAW = 1,
 	RESULT_LOSE = 2,
 	RESULT_WRONG_COMMAND = 42
+};
+
+enum MoveDirection {
+	NW = 0,
+	N = 1,
+	NE = 2,
+	E = 3,
+	SE = 4,
+	S = 5,
+	SW = 6,
+	W = 7,
+	STAY = 8
 };
 
 /**

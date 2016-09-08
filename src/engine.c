@@ -5,6 +5,9 @@
     @author Jan Wroblewski <xi@mimuw.edu.pl>
     @copyright Uniwersytet Warszawski
     @date 2016-04-26
+
+    @edited by Maciej Gontar <mg277344@mimuw.edu.pl>
+    @date 2016-08-26
  */
 
 #include <limits.h>
@@ -376,31 +379,8 @@ int move(int x1, int y1, int x2, int y2) {
     }
 }
 
-static int is_not_peasant(unit *unit) {
-    if (unit->type != 'c' && unit->type != 'C') {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-static int is_peasant(unit *unit) {
-    if (unit->type == 'c' && unit->type == 'C') {
-        return 1;
-    } else {
-        return 0;
-    }
-}
- static int is_king(unit *unit) {
-    if (unit->type == 'k' && unit->type == 'K') {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-static int is_knight(unit *unit) {
-    if (unit->type == 'r' && unit->type == 'R') {
+static int is_not_peasant(unit *pawn) {
+    if (pawn->type != 'c' && pawn->type != 'C') {
         return 1;
     } else {
         return 0;
@@ -440,6 +420,57 @@ static int produce_unit(int x1, int y1, int x2, int y2, char type) {
     peasant_produces->empty_rounds = -1;
 
     return RESULT_ONGOING;
+}
+
+/**
+ * AI function, determines if move in a specified direction is allowed
+ */
+int check_if_move_legal(int x1, int y1, enum MoveDirection direction) {
+    int x2 = x1;
+    int y2 = y1;
+    switch (direction) {
+        case NW :
+            x2--;
+            y2--;
+            break;
+        case W :
+            x2--;
+            break;
+        case SW :
+            x2--;
+            y2++;
+            break;
+        case N :
+            y2--;
+            break;
+        case S :
+            y2++;
+            break;
+        case NE:
+            x2++;
+            y2--;
+            break;
+        case E :
+            x2++;
+            break;
+        case SE :
+            x2++;
+            y2++;
+            break;
+        case STAY :
+            return 1;
+        default :
+            assert(false);
+    }
+    unit* new_unit_destination = find_unit(x2, y2); // checks for other units from the same player
+    if (new_unit_destination != NULL && player(new_unit_destination) == game->this_player) {
+        return 0;
+    }                                               // checks for board borders
+    if (MAX(x2, y2) > game->size ||
+        MIN(x2, y2) < 1) {
+        return 0;
+    }
+    return 1;
 }
 
 /**
@@ -490,27 +521,107 @@ int end_turn() {
     return RESULT_ONGOING;
 }
 
+/**
+ * Checks if the desired move is possible, if not, suggests 2 alternatives
+ */
+enum MoveDirection correct_best_move_towards(int x, int y, enum MoveDirection direction) {
+    if (check_if_move_legal(x, y, direction)) {
+        return direction;
+    } else if (check_if_move_legal(x, y, (direction+1)%8)) { // clockwise
+        return (direction + 1) % 8;
+    } else if (check_if_move_legal(x, y, (direction-1)%8)) { // counterclockwise
+        return (direction-1)%8;
+    } else {
+        return STAY;
+    }
+}
+
+enum MoveDirection find_best_move_towards(unit* ally, unit* enemy) {
+    enum MoveDirection direction;
+    int xdiff = ally->x - enemy->x;
+    int ydiff = ally->y - enemy->y;
+    if (xdiff > 0) {
+        if (ydiff > 0) {
+            direction = NW;
+        } else if (ydiff == 0) {
+            direction = W;
+        } else {
+            direction = SW;
+        }
+    } else if (xdiff == 0) {
+        if (ydiff > 0) {
+            direction = N;
+        } else if (ydiff == 0) {
+            direction = STAY;
+        } else {
+            direction = S;
+        }
+    } else {
+        if (ydiff > 0) {
+            direction = NE;
+        } else if (ydiff == 0) {
+            direction = E;
+        } else {
+            direction = SE;
+        }
+    }
+    return correct_best_move_towards(ally->x, ally->y, direction);
+}
+
 int move_king_ai(unit* king) {
     king->ai_move = true;
-    //print_move_command(king->x, king->y, (king->x), (king->y)-1);
-    //return move(king->x, king->y, (king->x), (king->y)-1);
     return RESULT_ONGOING;
 }
 
 int move_peasant_ai(unit* peasant) {
     peasant->ai_move = true;
-    //print_move_command(peasant->x, peasant->y, (peasant->x), (peasant->y)-1);
-    //return move(peasant->x, peasant->y, (peasant->x), (peasant->y)-1);
+    int x = peasant->x;
+    int y = peasant->y;
+
     if (peasant->empty_rounds == 2) {
+        unit* enemy = find_closest_enemy_unit(x, y);
+        enum MoveDirection direction = find_best_move_towards(peasant, enemy);
+        switch (direction) {
+            case NW :
+                x--;
+                y--;
+                break;
+            case W :
+                x--;
+                break;
+            case SW :
+                x--;
+                y++;
+                break;
+            case N :
+                y--;
+                break;
+            case S :
+                y++;
+                break;
+            case NE:
+                x++;
+                y--;
+                break;
+            case E :
+                x++;
+                break;
+            case SE :
+                x++;
+                y++;
+                break;
+            case STAY :
+                return RESULT_ONGOING;
+            default :
+                assert(false);
+        }
         if (game->built_peasant == false) {
-            //TODO Choose correct empty spot
-            print_produce_peasant_command(peasant->x, peasant->y, (peasant->x)-1, (peasant->y)-1);
             game->built_peasant = true;
-            return produce_peasant(peasant->x, peasant->y, (peasant->x)-1, (peasant->y)-1);
+            print_produce_peasant_command(peasant->x, peasant->y, x, y);
+            return produce_peasant(peasant->x, peasant->y,x, y);
         } else {
-            //TODO Choose correct empty spot
-            print_produce_knight_command(peasant->x, peasant->y, (peasant->x), (peasant->y)-1);
-            return produce_knight(peasant->x, peasant->y, (peasant->x), (peasant->y)-1);
+            print_produce_knight_command(peasant->x, peasant->y, x, y);
+            return produce_knight(peasant->x, peasant->y, x, y);
         }
     } else {
         return RESULT_ONGOING;
@@ -519,26 +630,47 @@ int move_peasant_ai(unit* peasant) {
 
 int move_knight_ai(unit* knight) {
     unit* enemy = find_closest_enemy_unit(knight->x, knight->y);
-    int x2;
-    int y2;
+    enum MoveDirection direction = find_best_move_towards(knight, enemy);
+    int x = knight->x;
+    int y = knight->y;
 
     knight->ai_move = true;
-    if (enemy->x > knight->x) {
-        x2 = (knight->x) + 1;
-    } else if (enemy->x < knight->x) {
-        x2 = (knight->x) - 1;
-    } else {
-        x2 = (knight->x);
+    switch (direction) {
+        case NW :
+            x--;
+            y--;
+            break;
+        case W :
+            x--;
+            break;
+        case SW :
+            x--;
+            y++;
+            break;
+        case N :
+            y--;
+            break;
+        case S :
+            y++;
+            break;
+        case NE:
+            x++;
+            y--;
+            break;
+        case E :
+            x++;
+            break;
+        case SE :
+            x++;
+            y++;
+            break;
+        case STAY :
+            return RESULT_ONGOING;
+        default :
+            assert(false);
     }
-    if (enemy->y > knight->y) {
-        y2 = (knight->y) + 1;
-    } else if (enemy->y < knight->y) {
-        y2 = (knight->y) - 1;
-    } else {
-        y2 = (knight->y);
-    }
-    print_move_command(knight->x, knight->y, x2, y2);
-    return move(knight->x, knight->y, x2, y2);
+    print_move_command(knight->x, knight->y, x, y);
+    return move(knight->x, knight->y, x, y);
 }
 
 int move_unit_ai(unit* pawn) {

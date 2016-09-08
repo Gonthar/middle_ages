@@ -6,6 +6,9 @@
     @author Jan Wroblewski <xi@mimuw.edu.pl>
     @copyright Uniwersytet Warszawski
     @date 2016-04-26
+
+    @edited by Maciej Gontar <mg277344@mimuw.edu.pl>
+    @date 2016-08-26
  */
 
 #include <stdio.h>
