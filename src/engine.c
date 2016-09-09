@@ -10,8 +10,6 @@
     @date 2016-08-26
  */
 
- //TODO peasants should not be spawned on enemy units
-
 #include <limits.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -187,7 +185,7 @@ static unit* find_next_free_unit() {
 }
 
 /**
- * Clears ai choices for this turn.
+ * Clears AI choices for this turn.
  */
 void clear_ai_move() {
     unit *unit_iterator = game->head;
@@ -425,9 +423,12 @@ static int produce_unit(int x1, int y1, int x2, int y2, char type) {
 }
 
 /**
- * AI function, determines if move in a specified direction is allowed
+ * AI function, determines if move in a specified direction is allowed.
+ * Boolean peasant determines whether unit trying to move/produce in specified direction
+ * is a knight or a peasant (knights want to kill enemy units, peasants don't want to/can't produce on
+ * tiles occupied by enemy).
  */
-int check_if_move_legal(int x1, int y1, enum MoveDirection direction) {
+int check_if_move_legal(int x1, int y1, enum MoveDirection direction, bool peasant) {
     int x2 = x1;
     int y2 = y1;
     switch (direction) {
@@ -464,11 +465,16 @@ int check_if_move_legal(int x1, int y1, enum MoveDirection direction) {
         default :
             assert(false);
     }
-    unit* new_unit_destination = find_unit(x2, y2); // checks for other units from the same player
-    if (new_unit_destination != NULL && player(new_unit_destination) == game->this_player) {
-        return 0;
-    }                                               // checks for board borders
-    if (MAX(x2, y2) > game->size ||
+    unit* new_unit_destination = find_unit(x2, y2); // checks for other units
+    if (new_unit_destination != NULL &&
+        player(new_unit_destination) == game->this_player) {
+        return 0;                                   // allied unit
+    }
+    if (new_unit_destination != NULL &&
+        peasant == true) {
+        return 0;                                   // enemy unit on tile where peasant is trying to build
+    }
+    if (MAX(x2, y2) > game->size ||                 // checks for board borders
         MIN(x2, y2) < 1) {
         return 0;
     }
@@ -526,19 +532,22 @@ int end_turn() {
 /**
  * Checks if the desired move is possible, if not, suggests 2 alternatives
  */
-enum MoveDirection correct_best_move_towards(int x, int y, enum MoveDirection direction) {
-    if (check_if_move_legal(x, y, direction)) {
+enum MoveDirection correct_best_move_towards(int x, int y, enum MoveDirection direction, bool peasant) {
+    if (check_if_move_legal(x, y, direction, peasant)) {
         return direction;
-    } else if (check_if_move_legal(x, y, (direction+1)%8)) { // clockwise
+    } else if (check_if_move_legal(x, y, (direction+1) % 8, peasant)) { // clockwise
         return (direction + 1) % 8;
-    } else if (check_if_move_legal(x, y, (direction-1)%8)) { // counterclockwise
+    } else if (check_if_move_legal(x, y, (direction-1) % 8, peasant)) { // counterclockwise
         return (direction-1) % 8;
     } else {
         return STAY;
     }
 }
 
-enum MoveDirection find_best_move_towards(unit* ally, unit* enemy) {
+/**
+ * Determines in which direction unit should move, assuming no obstacles
+ */
+enum MoveDirection find_best_move_towards(unit* ally, unit* enemy, bool peasant) {
     enum MoveDirection direction;
     int xdiff = ally->x - enemy->x;
     int ydiff = ally->y - enemy->y;
@@ -567,14 +576,20 @@ enum MoveDirection find_best_move_towards(unit* ally, unit* enemy) {
             direction = SE;
         }
     }
-    return correct_best_move_towards(ally->x, ally->y, direction);
+    return correct_best_move_towards(ally->x, ally->y, direction, peasant);
 }
 
+/**
+ * AI king doesn't move
+ */
 int move_king_ai(unit* king) {
     king->ai_move = true;
     return RESULT_ONGOING;
 }
 
+/**
+ * AI peasant builds another peasant, then spawns knights towards closest enemy unit.
+ */
 int move_peasant_ai(unit* peasant) {
     peasant->ai_move = true;
     int x = peasant->x;
@@ -582,7 +597,7 @@ int move_peasant_ai(unit* peasant) {
 
     if (peasant->empty_rounds == 2) {
         unit* enemy = find_closest_enemy_unit(x, y);
-        enum MoveDirection direction = find_best_move_towards(peasant, enemy);
+        enum MoveDirection direction = find_best_move_towards(peasant, enemy, true);
         switch (direction) {
             case NW :
                 x--;
@@ -630,9 +645,12 @@ int move_peasant_ai(unit* peasant) {
     }
 }
 
+/**
+ * AI Knights seek closest enemy (updated every turn) and charge.
+ */
 int move_knight_ai(unit* knight) {
     unit* enemy = find_closest_enemy_unit(knight->x, knight->y);
-    enum MoveDirection direction = find_best_move_towards(knight, enemy);
+    enum MoveDirection direction = find_best_move_towards(knight, enemy, false);
     int x = knight->x;
     int y = knight->y;
 
@@ -675,6 +693,9 @@ int move_knight_ai(unit* knight) {
     return move(knight->x, knight->y, x, y);
 }
 
+/**
+ * AI moves units depending on unit type.
+ */
 int move_unit_ai(unit* pawn) {
     switch(pawn->type){
         case 'c':
@@ -695,7 +716,7 @@ int move_unit_ai(unit* pawn) {
 }
 
 /**
- * Have AI compute and print its move.
+ * Have AI compute and print moves for all its units, then end turn.
  */
 int ai_make_move() {
     int exit_code = RESULT_ONGOING;
@@ -707,7 +728,7 @@ int ai_make_move() {
         if (next_unit == NULL) {
             print_end_turn_command();
             exit_code = end_turn();
-            // assert(exit_code != RESULT_WRONG_COMMAND);
+            assert(exit_code != RESULT_WRONG_COMMAND);
             return exit_code;
         } else {
             exit_code = move_unit_ai(next_unit);
