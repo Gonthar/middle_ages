@@ -10,6 +10,8 @@
     @date 2016-08-26
  */
 
+ //TODO peasants should not be spawned on enemy units
+
 #include <limits.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -46,7 +48,7 @@ void start_game() {
     game = NULL;
 }
 
-static int game_is_not_initialized() {
+int game_is_not_initialized() {
     return (game == NULL);
 }
 
@@ -368,7 +370,7 @@ int move(int x1, int y1, int x2, int y2) {
         return RESULT_ONGOING;
     } else {
         if (player(moved_unit) == player(destination_unit)) {
-            return wrong_command_exit(); // error, try to move into position occupied by his own unit
+            return wrong_command_exit(); // error, try to movef into position occupied by his own unit
         }
         else {
             moved_unit->x = x2;
@@ -530,7 +532,7 @@ enum MoveDirection correct_best_move_towards(int x, int y, enum MoveDirection di
     } else if (check_if_move_legal(x, y, (direction+1)%8)) { // clockwise
         return (direction + 1) % 8;
     } else if (check_if_move_legal(x, y, (direction-1)%8)) { // counterclockwise
-        return (direction-1)%8;
+        return (direction-1) % 8;
     } else {
         return STAY;
     }
