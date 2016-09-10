@@ -21,6 +21,8 @@ print.h
 /home/maciek/Projects/middle_ages/src/print.h
 
 /home/maciek/Projects/middle_ages/src/engine.h
+stdbool.h
+-
 
 /home/maciek/Projects/middle_ages/src/middle_ages.c
 stdio.h

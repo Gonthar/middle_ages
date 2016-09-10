@@ -56,17 +56,6 @@ CMAKE_BINARY_DIR = /home/maciek/Projects/middle_ages
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target edit_cache
-edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
-	/usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
-.PHONY : edit_cache
-
-# Special rule for the target edit_cache
-edit_cache/fast: edit_cache
-
-.PHONY : edit_cache/fast
-
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
@@ -77,6 +66,17 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 
 .PHONY : rebuild_cache/fast
+
+# Special rule for the target edit_cache
+edit_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
+	/usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+.PHONY : edit_cache
+
+# Special rule for the target edit_cache
+edit_cache/fast: edit_cache
+
+.PHONY : edit_cache/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -109,6 +109,19 @@ preinstall/fast:
 depend:
 	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
+
+#=============================================================================
+# Target rules for targets named middle_ages_tests
+
+# Build rule for target.
+middle_ages_tests: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 middle_ages_tests
+.PHONY : middle_ages_tests
+
+# fast build rule for target.
+middle_ages_tests/fast:
+	$(MAKE) -f CMakeFiles/middle_ages_tests.dir/build.make CMakeFiles/middle_ages_tests.dir/build
+.PHONY : middle_ages_tests/fast
 
 #=============================================================================
 # Target rules for targets named middle_ages
@@ -231,14 +244,42 @@ src/print.c.s:
 	$(MAKE) -f CMakeFiles/middle_ages.dir/build.make CMakeFiles/middle_ages.dir/src/print.c.s
 .PHONY : src/print.c.s
 
+tests/middle_ages_tests.o: tests/middle_ages_tests.c.o
+
+.PHONY : tests/middle_ages_tests.o
+
+# target to build an object file
+tests/middle_ages_tests.c.o:
+	$(MAKE) -f CMakeFiles/middle_ages_tests.dir/build.make CMakeFiles/middle_ages_tests.dir/tests/middle_ages_tests.c.o
+.PHONY : tests/middle_ages_tests.c.o
+
+tests/middle_ages_tests.i: tests/middle_ages_tests.c.i
+
+.PHONY : tests/middle_ages_tests.i
+
+# target to preprocess a source file
+tests/middle_ages_tests.c.i:
+	$(MAKE) -f CMakeFiles/middle_ages_tests.dir/build.make CMakeFiles/middle_ages_tests.dir/tests/middle_ages_tests.c.i
+.PHONY : tests/middle_ages_tests.c.i
+
+tests/middle_ages_tests.s: tests/middle_ages_tests.c.s
+
+.PHONY : tests/middle_ages_tests.s
+
+# target to generate assembly for a file
+tests/middle_ages_tests.c.s:
+	$(MAKE) -f CMakeFiles/middle_ages_tests.dir/build.make CMakeFiles/middle_ages_tests.dir/tests/middle_ages_tests.c.s
+.PHONY : tests/middle_ages_tests.c.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... edit_cache"
+	@echo "... middle_ages_tests"
 	@echo "... middle_ages"
 	@echo "... src/engine.o"
 	@echo "... src/engine.i"
@@ -252,6 +293,9 @@ help:
 	@echo "... src/print.o"
 	@echo "... src/print.i"
 	@echo "... src/print.s"
+	@echo "... tests/middle_ages_tests.o"
+	@echo "... tests/middle_ages_tests.i"
+	@echo "... tests/middle_ages_tests.s"
 .PHONY : help
 
 

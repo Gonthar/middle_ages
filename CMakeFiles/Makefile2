@@ -60,6 +60,43 @@ CMAKE_SOURCE_DIR = /home/maciek/Projects/middle_ages
 CMAKE_BINARY_DIR = /home/maciek/Projects/middle_ages
 
 #=============================================================================
+# Target rules for target CMakeFiles/middle_ages_tests.dir
+
+# All Build rule for target.
+CMakeFiles/middle_ages_tests.dir/all:
+	$(MAKE) -f CMakeFiles/middle_ages_tests.dir/build.make CMakeFiles/middle_ages_tests.dir/depend
+	$(MAKE) -f CMakeFiles/middle_ages_tests.dir/build.make CMakeFiles/middle_ages_tests.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/maciek/Projects/middle_ages/CMakeFiles --progress-num=6,7 "Built target middle_ages_tests"
+.PHONY : CMakeFiles/middle_ages_tests.dir/all
+
+# Include target in all.
+all: CMakeFiles/middle_ages_tests.dir/all
+
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/middle_ages_tests.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/maciek/Projects/middle_ages/CMakeFiles 2
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/middle_ages_tests.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/maciek/Projects/middle_ages/CMakeFiles 0
+.PHONY : CMakeFiles/middle_ages_tests.dir/rule
+
+# Convenience name for target.
+middle_ages_tests: CMakeFiles/middle_ages_tests.dir/rule
+
+.PHONY : middle_ages_tests
+
+# clean rule for target.
+CMakeFiles/middle_ages_tests.dir/clean:
+	$(MAKE) -f CMakeFiles/middle_ages_tests.dir/build.make CMakeFiles/middle_ages_tests.dir/clean
+.PHONY : CMakeFiles/middle_ages_tests.dir/clean
+
+# clean rule for target.
+clean: CMakeFiles/middle_ages_tests.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
 # Target rules for target CMakeFiles/middle_ages.dir
 
 # All Build rule for target.

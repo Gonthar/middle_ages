@@ -13,7 +13,21 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-/**
+#include <stdbool.h>
+
+typedef struct def_unit unit;
+
+struct def_unit {
+char type;        // K,R,C - king, knight, peasant of first player; k,r or c - king, knight, peasant of second player
+	int x;            // x coordinate of the unit
+	int y;            // y coordinate of the unit
+ 	int empty_rounds; // -1 means a move done in a current round; when =2 then peasant can produce new unit
+ 	int ai_move;    // ai has already chosen what to do with the unit in this turn =1 YES, =0 NO
+ 	unit *next;
+};
+
+
+ /**
  * Possible results from most functions in this module describing game state after they are finished.
  */
 enum GameResult {
@@ -33,7 +47,8 @@ enum MoveDirection {
 	S = 5,
 	SW = 6,
 	W = 7,
-	STAY = 8
+	STAY = 8,
+	WRONG_INPUT = 9
 };
 
 /**
@@ -97,6 +112,20 @@ void end_game();
  * @return `RESULT_ONGOING`, `RESULT_WIN`, `RESULT_DRAW`, `RESULT_LOSE` describing state of the game after the move and possibly fight.
  */
 int ai_make_move();
+
+/**
+* Determines in which direction unit should move, assuming no obstacles
+*/
+enum MoveDirection find_best_move_towards(unit* ally, unit* enemy, bool peasant);
+
+static unit* find_unit(int x1, int y1);
+
+/**
+* Evaluates which one player is an owner of unit u.
+*/
+static int player(unit* u);
+
+static int is_not_peasant(unit *pawn);
 
 #endif /* ENGINE_H */
 

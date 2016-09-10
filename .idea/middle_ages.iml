@@ -3,12 +3,17 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src/engine.c" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/parse.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/print.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/parse.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/middle_ages.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/print.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/print.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/parse.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/engine.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tests/test_move_execution.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tests/test_move_direction.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tests/middle_ages_tests.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tests/test_move_direction.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tests/test_move_execution.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />

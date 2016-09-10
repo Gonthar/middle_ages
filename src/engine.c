@@ -20,17 +20,6 @@
 #define MIN(a, b) (((a)<(b))?(a):(b))
 #define MAX(a, b) (((a)>(b))?(a):(b))
 
-typedef struct def_unit unit;
-
-struct def_unit {
-    char type;        // K,R,C - king, knight, peasant of first player; k,r or c - king, knight, peasant of second player
-    int x;            // x coordinate of the unit
-    int y;            // y coordinate of the unit
-    int empty_rounds; // -1 means a move done in a current round; when =2 then peasant can produce new unit
-    bool ai_move;    // ai has already chosen what to do with the unit in this turn
-    unit *next;
-};
-
 typedef struct def_board {
     unit *head;					  // list of units
     int size;				      // size of a board
@@ -123,7 +112,7 @@ static int insert_unit(char unit_type, int x, int y) {
     new_unit->x = x;
     new_unit->y = y;
     new_unit->empty_rounds = 0;
-    new_unit->ai_move = false;
+    new_unit->ai_move = 0;
     new_unit->next = game->head;
     game->head = new_unit;
 
@@ -176,7 +165,7 @@ static unit* find_closest_enemy_unit(int x1, int y1) {
 static unit* find_next_free_unit() {
     unit *unit_iterator = game->head;
     while (unit_iterator != NULL) {
-        if (unit_iterator->ai_move == false && player(unit_iterator) == game->this_player) {
+        if (unit_iterator->ai_move == 0 && player(unit_iterator) == game->this_player) {
             return unit_iterator;
         }
         unit_iterator = unit_iterator->next;
@@ -190,7 +179,7 @@ static unit* find_next_free_unit() {
 void clear_ai_move() {
     unit *unit_iterator = game->head;
     while (unit_iterator != NULL) {
-        unit_iterator->ai_move = false;
+        unit_iterator->ai_move = 0;
         unit_iterator = unit_iterator->next;
     }
 }
@@ -549,6 +538,9 @@ enum MoveDirection correct_best_move_towards(int x, int y, enum MoveDirection di
  */
 enum MoveDirection find_best_move_towards(unit* ally, unit* enemy, bool peasant) {
     enum MoveDirection direction;
+    if (ally == NULL || enemy == NULL) {
+        return WRONG_INPUT;
+    }
     int xdiff = ally->x - enemy->x;
     int ydiff = ally->y - enemy->y;
     if (xdiff > 0) {
@@ -583,7 +575,7 @@ enum MoveDirection find_best_move_towards(unit* ally, unit* enemy, bool peasant)
  * AI king doesn't move
  */
 int move_king_ai(unit* king) {
-    king->ai_move = true;
+    king->ai_move = 1;
     return RESULT_ONGOING;
 }
 
@@ -591,7 +583,7 @@ int move_king_ai(unit* king) {
  * AI peasant builds another peasant, then spawns knights towards closest enemy unit.
  */
 int move_peasant_ai(unit* peasant) {
-    peasant->ai_move = true;
+    peasant->ai_move = 1;
     int x = peasant->x;
     int y = peasant->y;
 
@@ -629,6 +621,8 @@ int move_peasant_ai(unit* peasant) {
                 break;
             case STAY :
                 return RESULT_ONGOING;
+            case WRONG_INPUT :
+                return RESULT_WRONG_COMMAND;
             default :
                 assert(false);
         }
@@ -654,7 +648,7 @@ int move_knight_ai(unit* knight) {
     int x = knight->x;
     int y = knight->y;
 
-    knight->ai_move = true;
+    knight->ai_move = 1;
     switch (direction) {
         case NW :
             x--;
@@ -686,6 +680,8 @@ int move_knight_ai(unit* knight) {
             break;
         case STAY :
             return RESULT_ONGOING;
+        case WRONG_INPUT :
+            return RESULT_WRONG_COMMAND;
         default :
             assert(false);
     }
